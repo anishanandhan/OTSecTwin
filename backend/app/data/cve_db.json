@@ -1,0 +1,80 @@
+[
+  {
+    "id": "CVE-2021-34588",
+    "cve_id": "CVE-2021-34588",
+    "title": "OpenPLC Runtime Modbus Stack Buffer Overflow",
+    "description": "A stack-based buffer overflow in the Modbus/TCP request parser of OpenPLC Runtime v3 allows unauthenticated remote attackers to execute arbitrary code or cause a Denial of Service via a crafted Modbus FC16 frame.",
+    "cvss_score": 9.8,
+    "severity": "CRITICAL",
+    "affected_vendors": ["OpenPLC", "Generic OT"],
+    "affected_models": ["v3.0", "SoftPLC"],
+    "cpe_match": "cpe:2.3:a:openplc:runtime:3.0:*:*:*:*:*:*:*",
+    "exploit_available": true,
+    "remediation": "Upgrade OpenPLC Runtime to v3.2 or enforce strict deep-packet inspection on Modbus FC16 write commands."
+  },
+  {
+    "id": "CVE-2022-38465",
+    "cve_id": "CVE-2022-38465",
+    "title": "Siemens SIMATIC S7-1200 Hardcoded Cryptographic Key Exposure",
+    "description": "Siemens SIMATIC S7-1200 and S7-1500 CPU firmware prior to v4.5 uses a global hardcoded cryptographic key for TLS communications, allowing remote attackers to intercept and forge PLC control communications.",
+    "cvss_score": 9.3,
+    "severity": "CRITICAL",
+    "affected_vendors": ["Siemens"],
+    "affected_models": ["S7-1200", "S7-1500"],
+    "cpe_match": "cpe:2.3:o:siemens:s7-1200_firmware:*:*:*:*:*:*:*:*",
+    "exploit_available": true,
+    "remediation": "Update CPU firmware to v4.5+ and enable TLS 1.3 individual certificate validation."
+  },
+  {
+    "id": "CVE-2023-22855",
+    "cve_id": "CVE-2023-22855",
+    "title": "Schneider Electric Modicon M221 Unauthenticated Modbus Write Command Execution",
+    "description": "Schneider Electric Modicon M221 PLCs do not properly authenticate Modbus FC05/FC06 coil/register write operations, permitting unauthorized control manipulations from any network host with TCP 502 access.",
+    "cvss_score": 8.8,
+    "severity": "HIGH",
+    "affected_vendors": ["Schneider Electric", "Schneider"],
+    "affected_models": ["Modicon M221", "Modicon"],
+    "cpe_match": "cpe:2.3:h:schneider-electric:modicon_m221:*:*:*:*:*:*:*:*",
+    "exploit_available": true,
+    "remediation": "Restrict TCP port 502 access to authorized HMI/SCADA IPs using network ACLs and enable read-only Modbus mode."
+  },
+  {
+    "id": "CVE-2020-7589",
+    "cve_id": "CVE-2020-7589",
+    "title": "Schneider Electric EcoStruxure Operator Terminal Expert Memory Corruption",
+    "description": "A memory corruption vulnerability in EcoStruxure Operator Terminal Expert allows remote attackers to execute arbitrary code on HMI operator workstations when parsing maliciously crafted project files.",
+    "cvss_score": 7.8,
+    "severity": "HIGH",
+    "affected_vendors": ["Schneider Electric", "Schneider"],
+    "affected_models": ["EcoStruxure HMI", "HMI-001"],
+    "cpe_match": "cpe:2.3:a:schneider-electric:ecostruxure_operator_terminal_expert:*:*:*:*:*:*:*:*",
+    "exploit_available": false,
+    "remediation": "Apply vendor security patch v3.1 SP1 and restrict EWS file transfer permissions."
+  },
+  {
+    "id": "CVE-2021-22681",
+    "cve_id": "CVE-2021-22681",
+    "title": "Rockwell Automation Logix Controllers Authentication Bypass",
+    "description": "Rockwell Automation FactoryTalk Logix Controllers accept unauthenticated CIP engineering commands allowing remote users to modify controller logic, set points, or force physical outputs.",
+    "cvss_score": 10.0,
+    "severity": "CRITICAL",
+    "affected_vendors": ["Rockwell Automation", "Allen-Bradley"],
+    "affected_models": ["ControlLogix", "CompactLogix"],
+    "cpe_match": "cpe:2.3:h:rockwellautomation:controllogix:*:*:*:*:*:*:*:*",
+    "exploit_available": true,
+    "remediation": "Turn controller keyswitch to RUN mode to prevent remote programming edits and enforce CIP Security."
+  },
+  {
+    "id": "CVE-2023-34320",
+    "cve_id": "CVE-2023-34320",
+    "title": "Ignition SCADA / HMI Unauthenticated API Remote Code Execution",
+    "description": "Inductive Automation Ignition SCADA web gateway contains a deserialization of untrusted data vulnerability on HTTP API endpoints, leading to unauthenticated remote system takeover.",
+    "cvss_score": 9.8,
+    "severity": "CRITICAL",
+    "affected_vendors": ["Inductive Automation", "SCADA-001"],
+    "affected_models": ["Ignition v8.1"],
+    "cpe_match": "cpe:2.3:a:inductiveautomation:ignition:8.1.0:*:*:*:*:*:*:*",
+    "exploit_available": true,
+    "remediation": "Upgrade Ignition gateway to v8.1.28 and restrict web access to trusted management subnets."
+  }
+]
