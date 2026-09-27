@@ -11,7 +11,7 @@ from app.services.topology_engine import record_connection
 from app.services.baseline_engine import inspect_telemetry_against_baseline
 from app.services.vulnerability_engine import correlate_asset_vulnerabilities
 from app.services.risk_engine import recalculate_asset_risk
-from app.models.db_models import TelemetryLogModel
+from app.models.db_models import TelemetryLogModel, AssetModel
 from app.config import SAMPLE_PCAP_DIR
 
 MODBUS_FUNCTIONS = {
