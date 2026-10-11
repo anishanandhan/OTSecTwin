@@ -1,9 +1,4 @@
-const API_BASE_URL =
-  typeof window !== "undefined" &&
-  window.location.hostname === "localhost" &&
-  (window.location.port === "5173" || window.location.port === "5174" || window.location.port === "3000")
-    ? "http://localhost:8000/api"
-    : "/api";
+const API_BASE_URL = "/api";
 
 export async function fetchAssets() {
   const res = await fetch(`${API_BASE_URL}/assets`);

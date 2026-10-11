@@ -164,7 +164,7 @@ export default function TelemetrySimulator({ onSimulationTriggered }) {
           <div className="pt-4 border-t border-[#1e2d4a]">
             <p className="text-xs font-semibold text-slate-300 mb-2">Export Telemetry for Wireshark</p>
             <a
-              href="http://localhost:8000/api/simulator/download_pcap"
+              href="/api/simulator/download_pcap"
               download="ot_telemetry_capture.pcap"
               className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-semibold rounded-xl border border-cyan-500/30 transition-all"
             >

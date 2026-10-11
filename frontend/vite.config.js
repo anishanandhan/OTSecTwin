@@ -13,6 +13,13 @@ export default defineConfig({
     allowedHosts: true,
     fs: {
       strict: false
+    },
+    proxy: {
+      '/api': {
+        target: process.env.BACKEND_URL || 'http://backend:8000',
+        changeOrigin: true,
+        secure: false,
+      }
     }
   }
 })
