@@ -10,6 +10,7 @@ import TelemetrySimulator from "./components/TelemetrySimulator";
 import CyberPhysicalLab from "./components/CyberPhysicalLab";
 import AICopilotDrawer from "./components/AICopilotDrawer";
 import ResearcherDossierModal from "./components/ResearcherDossierModal";
+import PortfolioHub from "./components/PortfolioHub";
 import { Sparkles, Sliders, Shield, ArrowRight, X, ExternalLink, Award } from "lucide-react";
 
 import {
@@ -225,6 +226,10 @@ export default function App() {
             <CyberPhysicalLab onAnomalyDetected={loadAllData} />
             <TelemetrySimulator onSimulationTriggered={loadAllData} />
           </div>
+        )}
+
+        {activeTab === "portfolio" && (
+          <PortfolioHub onNavigateToPlantLab={() => setActiveTab("simulator")} />
         )}
 
         {activeTab === "assets" && (

@@ -1,10 +1,11 @@
 import React from "react";
-import { Shield, Activity, Network, Box, AlertTriangle, Play, RotateCcw, Cpu, Sparkles, Layers, Sliders } from "lucide-react";
+import { Shield, Activity, Network, Box, AlertTriangle, Play, RotateCcw, Cpu, Sparkles, Layers, Sliders, Award, BookOpen } from "lucide-react";
 
 export default function Navbar({ activeTab, setActiveTab, alertCount, onTriggerSim, onInjectAttack, onResetLab, onToggleAiCopilot, onOpenDossier }) {
   const tabs = [
     { id: "overview", label: "Dashboard", icon: Activity },
     { id: "simulator", label: "LabShock Plant P&ID", icon: Sliders },
+    { id: "portfolio", label: "Dossier & Case Studies", icon: Award },
     { id: "assets", label: "Asset Inventory", icon: Box },
     { id: "topology", label: "Purdue Topology", icon: Network },
     { id: "vulnerabilities", label: "CVE Matrix", icon: Shield },
