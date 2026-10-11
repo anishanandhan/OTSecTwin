@@ -1,5 +1,6 @@
 import React from "react";
-import { ArrowLeft, ArrowRight, ExternalLink, Github, CheckCircle2, Shield, Cpu, Code2, Layers, Award } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, CheckCircle2, Shield, Cpu, Code2, Layers, Award } from "lucide-react";
+import { GithubIcon } from "./SocialIcons";
 
 export const CASE_STUDIES = [
   {
@@ -229,7 +230,7 @@ export default function CaseStudyView({ slug, onBack, onSelectSlug }) {
             rel="noreferrer"
             className="px-3.5 py-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium flex items-center gap-1.5 transition"
           >
-            <Github className="w-3.5 h-3.5" />
+            <GithubIcon className="w-3.5 h-3.5" />
             <span>GitHub Repository</span>
           </a>
         </div>

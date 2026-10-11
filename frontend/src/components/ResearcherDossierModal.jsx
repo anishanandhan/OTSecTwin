@@ -1,5 +1,6 @@
 import React from "react";
-import { X, ExternalLink, Award, BookOpen, Briefcase, GraduationCap, Github, Linkedin, Mail, Calendar, ArrowRight, ShieldCheck, CheckCircle2, Sparkles, Terminal } from "lucide-react";
+import { X, ExternalLink, Award, BookOpen, Briefcase, GraduationCap, Mail, Calendar, ArrowRight, ShieldCheck, CheckCircle2, Sparkles, Terminal } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "./SocialIcons";
 
 export default function ResearcherDossierModal({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -187,7 +188,7 @@ export default function ResearcherDossierModal({ isOpen, onClose }) {
                 rel="noreferrer"
                 className="px-3 py-1.5 rounded-md bg-[#0e1424] hover:bg-[#1a233a] border border-white/10 text-white text-xs font-medium flex items-center gap-1.5 transition"
               >
-                <Github className="w-3.5 h-3.5" />
+                <GithubIcon className="w-3.5 h-3.5" />
                 <span>GitHub</span>
               </a>
               <a
@@ -196,7 +197,7 @@ export default function ResearcherDossierModal({ isOpen, onClose }) {
                 rel="noreferrer"
                 className="px-3 py-1.5 rounded-md bg-[#0e1424] hover:bg-[#1a233a] border border-white/10 text-white text-xs font-medium flex items-center gap-1.5 transition"
               >
-                <Linkedin className="w-3.5 h-3.5 text-blue-400" />
+                <LinkedinIcon className="w-3.5 h-3.5 text-blue-400" />
                 <span>LinkedIn</span>
               </a>
               <a

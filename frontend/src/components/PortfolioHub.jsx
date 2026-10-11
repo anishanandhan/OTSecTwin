@@ -6,9 +6,10 @@ import MaintenanceSystemModal from "./MaintenanceSystemModal";
 import { useScrambleText, useCurrentlyCycle, useCountUp } from "../utils/effects";
 import { trackEvent, getABVariant } from "../utils/analytics";
 import { 
-  ArrowRight, ExternalLink, Github, Linkedin, Mail, BookOpen, Award, 
+  ArrowRight, ExternalLink, Mail, BookOpen, Award, 
   ShieldCheck, Cpu, Code2, Layers, CheckCircle2, Terminal, Sparkles, Sliders, Wrench, Newspaper
 } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "./SocialIcons";
 
 export default function PortfolioHub({ onNavigateToPlantLab }) {
   const [selectedCaseStudy, setSelectedCaseStudy] = useState(null);
@@ -371,7 +372,7 @@ export default function PortfolioHub({ onNavigateToPlantLab }) {
                     rel="noreferrer"
                     className="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition"
                   >
-                    <Github className="w-3 h-3" />
+                    <GithubIcon className="w-3 h-3" />
                     <span>Code Repository</span>
                   </a>
                 </div>
@@ -498,7 +499,7 @@ export default function PortfolioHub({ onNavigateToPlantLab }) {
                 className="p-2 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition"
                 title="GitHub Profile"
               >
-                <Github className="w-4 h-4" />
+                <GithubIcon className="w-4 h-4" />
               </a>
               <a
                 href="https://linkedin.com/in/anishanandhan"
@@ -508,7 +509,7 @@ export default function PortfolioHub({ onNavigateToPlantLab }) {
                 className="p-2 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition"
                 title="LinkedIn Profile"
               >
-                <Linkedin className="w-4 h-4 text-blue-400" />
+                <LinkedinIcon className="w-4 h-4 text-blue-400" />
               </a>
             </div>
           </section>
