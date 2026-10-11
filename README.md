@@ -2,6 +2,8 @@
 
 **OTSecTwin** is a passive Operational Technology (OT) and Industrial Control Systems (ICS) security platform that continuously discovers, identifies, monitors, assesses, and visualizes OT/ICS assets and their security posture using passive network telemetry (Modbus/TCP).
 
+🌐 **Live Deployment**: [https://travelers-kind-mountain-tennessee.trycloudflare.com](https://travelers-kind-mountain-tennessee.trycloudflare.com) *(Powered by Cloudflare Edge — Zero password required)*
+
 ---
 
 ## 🚀 Quick Start (Local Setup)
