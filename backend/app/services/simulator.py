@@ -336,7 +336,7 @@ def get_plant_state():
     PLANT_STATE["last_updated"] = datetime.utcnow().isoformat()
     return dict(PLANT_STATE)
 
-def update_plant_control(controls: dict, db: Session):
+def update_plant_control(controls: dict, db: Session = None):
     """
     Updates operator control setpoints on the physical plant.
     """
@@ -351,21 +351,22 @@ def update_plant_control(controls: dict, db: Session):
     if "relief_valve" in controls and controls["relief_valve"] is not None:
         PLANT_STATE["relief_valve"] = controls["relief_valve"]
 
-    log = TelemetryLogModel(
-        timestamp=datetime.utcnow(),
-        src_ip="192.168.10.20",
-        dst_ip="192.168.10.10",
-        src_port=50200,
-        dst_port=502,
-        protocol="Modbus/TCP",
-        function_code="FC06",
-        func_name="Write Single Register (Operator HMI Command)",
-        unit_id=1,
-        register_address=40004,
-        register_value=1 if PLANT_STATE["pump_status"] == "RUNNING" else 0,
-        is_anomalous=False
-    )
-    db.add(log)
-    db.commit()
+    if db:
+        log = TelemetryLogModel(
+            timestamp=datetime.utcnow(),
+            src_ip="192.168.10.20",
+            dst_ip="192.168.10.10",
+            src_port=50200,
+            dst_port=502,
+            protocol="Modbus/TCP",
+            function_code="FC06",
+            func_name="Write Single Register (Operator HMI Command)",
+            unit_id=1,
+            register_address=40004,
+            register_value=1 if PLANT_STATE["pump_status"] == "RUNNING" else 0,
+            is_anomalous=False
+        )
+        db.add(log)
+        db.commit()
     return get_plant_state()
 

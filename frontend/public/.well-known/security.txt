@@ -1,0 +1,6 @@
+Contact: mailto:security@otsectwin.internal
+Expires: 2027-10-11T00:00:00.000Z
+Preferred-Languages: en
+Policy: https://github.com/anishanandhan/OTSecTwin/blob/main/SECURITY.md
+Canonical: https://travelers-kind-mountain-tennessee.trycloudflare.com/.well-known/security.txt
+Acknowledgments: https://github.com/anishanandhan/OTSecTwin/blob/main/README.md#acknowledgements

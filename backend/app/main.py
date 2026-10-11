@@ -7,6 +7,7 @@ from app.api import assets, topology, twin, vulnerabilities, alerts, telemetry, 
 from app.services.vulnerability_engine import seed_vulnerability_database
 from app.services.baseline_engine import seed_baseline_rules
 from app.services.simulator import seed_simulated_ot_lab
+from app.security.headers import SecurityHeadersMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,7 +30,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Middleware setup
+# Security Headers & CORS Middleware setup
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
