@@ -26,11 +26,11 @@ export default function PortfolioHub({ onNavigateToPlantLab }) {
 
   // Layer 6 & 9: Currently Cycling Typewriter
   const currentlyItems = [
-    "Building CrystalSliver at IIT Madras CyStar",
-    "Shipping SentStadium — 97.5/100 AI score",
-    "Joining Medtronic Global IT · Hyderabad · 2026",
-    "Growing Seryth — AI fragrance personalization",
-    "Engineering OTSecTwin zero-downtime ICS defense"
+    "Building CrystalSliver — adversarial kernel analysis",
+    "Shipping SentStadium — 97.5/100 AI performance score",
+    "Developing real-time Modbus L1/L2 physics simulation",
+    "Engineering OTSecTwin zero-downtime ICS defense",
+    "Benchmarking ODE telemetry divergence detection"
   ];
   const currentlyText = useCurrentlyCycle(currentlyItems, 3500);
 
@@ -128,7 +128,7 @@ export default function PortfolioHub({ onNavigateToPlantLab }) {
                 >
                   &gt; {heroBadge}
                 </span>
-                <span className="text-slate-400 text-xs font-mono">IIT Madras CyStar · IEEE Author</span>
+                <span className="text-slate-400 text-xs font-mono">Cybersecurity & AI Engineering</span>
                 <span className="status-pill status-pill-cyan text-[10px] font-mono">Test Variant {headlineVariant}</span>
               </div>
 
@@ -143,18 +143,18 @@ export default function PortfolioHub({ onNavigateToPlantLab }) {
 
               {/* Subheadline (Layer 9) */}
               <p className="text-base sm:text-lg text-slate-300 max-w-2xl leading-relaxed font-normal">
-                Research intern at <strong className="text-white">IIT Madras CyStar</strong> · IEEE author · Joining <strong className="text-white">Medtronic Global IT</strong> · Co-founder at <strong className="text-white">Seryth</strong>.
+                Specialized in <strong className="text-white">autonomous multi-agent orchestration</strong>, <strong className="text-white">operational technology (OT) cyber-physical protection</strong>, and <strong className="text-white">adversarial threat modeling</strong>.
               </p>
 
-              {/* Trust Institutional Marks (Layer 9: Grayscale 28px height) */}
+              {/* Trust Institutional Marks */}
               <div className="pt-2 flex flex-wrap items-center gap-6 sm:gap-8 border-t border-white/5 pt-4 text-xs font-mono text-slate-400">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                  <span>IIT MADRAS CYSTAR</span>
+                  <span>CYBER-PHYSICAL DIGITAL TWINS</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-blue-400" />
-                  <span>MEDTRONIC GLOBAL IT</span>
+                  <span>MODBUS / SCADA DEFENSE</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-purple-400" />
@@ -162,7 +162,7 @@ export default function PortfolioHub({ onNavigateToPlantLab }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span>VIT CHENNAI</span>
+                  <span>MULTI-AGENT AI ARCHITECTURE</span>
                 </div>
               </div>
 
@@ -273,7 +273,7 @@ export default function PortfolioHub({ onNavigateToPlantLab }) {
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="status-pill status-pill-emerald font-mono text-[10px]">IIT Madras CyStar</span>
+                    <span className="status-pill status-pill-emerald font-mono text-[10px]">Kernel Security Lab</span>
                     <span className="text-2xl font-bold font-mono text-cyan-400">{driverCount}+ Drivers</span>
                   </div>
                   <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition">
@@ -343,7 +343,7 @@ export default function PortfolioHub({ onNavigateToPlantLab }) {
                   <span className="status-pill status-pill-purple font-mono text-[10px]">
                     IEEE Industrial Electronics Society · 2026
                   </span>
-                  <span className="text-[11px] font-mono text-cyan-400">IIT Madras CyStar</span>
+                  <span className="text-[11px] font-mono text-cyan-400">Industrial Security Research</span>
                 </div>
 
                 <h3 className="text-sm sm:text-base font-bold text-white">

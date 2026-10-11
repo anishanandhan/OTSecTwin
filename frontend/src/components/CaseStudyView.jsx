@@ -43,7 +43,7 @@ def compute_critical_density(frames, threshold=0.78):
     headline: "BYOVD Adversarial Threat Intelligence & C2 Database",
     year: "2025",
     stack: "Python · Splunk · NetworkX · Ghidra · WinDbg",
-    role: "Adversarial Security Researcher @ IIT Madras CyStar",
+    role: "Adversarial Security Researcher & Lead Architect",
     heroMetric: "40+ Drivers",
     metricLabel: "Vulnerable Signed Kernel Drivers Mapped",
     overview: {
@@ -64,7 +64,7 @@ def audit_ioctl_handler(device_extension, ioctl_code):
     },
     outcome: {
       metric: "100% Detection",
-      enabled: "Provided offensive and defensive telemetry for IIT Madras CyStar's adversarial emulation infrastructure.",
+      enabled: "Provided offensive and defensive telemetry for enterprise adversarial emulation infrastructure.",
       nextSlug: "otsectwin"
     }
   },

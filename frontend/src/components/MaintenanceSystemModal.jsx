@@ -152,7 +152,7 @@ export default function MaintenanceSystemModal({ isOpen, onClose }) {
           <div className="p-4 rounded-lg bg-[#0a0f1d] border border-white/10 text-slate-400 space-y-1">
             <span className="text-white font-semibold block">Competitive Audit Rhythm:</span>
             <p>
-              Once per quarter, review 3 portfolios of engineers at Medtronic and top AI labs. Preserve your specific technical edge (cybersecurity + deep ODE digital twin + IIT Madras provenance) rather than following generic web design fads.
+              Once per quarter, review 3 product consoles of leading ICS security vendors. Preserve your specific technical edge (real-time cyber-physical protection + deep ODE digital twin + zero-packet PLC disruption) rather than following generic web design fads.
             </p>
           </div>
         </div>

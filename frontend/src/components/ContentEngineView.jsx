@@ -162,7 +162,7 @@ export default function ContentEngineView({ onSelectCaseStudy }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-1">
           {[
             { term: "anish anandhan", comp: "Zero Competition", target: "Personal Domain & Papers" },
-            { term: "IIT Madras CyStar research", comp: "Niche Winnable", target: "CyStar Lab Citations" },
+            { term: "cyber-physical digital twin ICS", comp: "High Intent", target: "Platform Architecture" },
             { term: "BYOVD driver database", comp: "Very Niche", target: "DriverArmory Repository" },
             { term: "SentStadium hackathon", comp: "Zero Competition", target: "AI Architecture Writeup" },
             { term: "DriverArmory BYOVD", comp: "Zero Competition", target: "Kernel Security Analysis" },
