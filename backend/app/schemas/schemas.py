@@ -19,6 +19,13 @@ class AssetBase(BaseModel):
     risk_score: float
     risk_level: str
     risk_breakdown: Dict[str, Any] = {}
+    fingerprint_method: Optional[str] = "Passive Modbus Telemetry"
+    confidence_score: Optional[float] = 95.0
+    os_signature: Optional[str] = "Embedded Controller OS"
+    hardware_modules: Optional[List[Dict[str, Any]]] = []
+    config_hash: Optional[str] = None
+    drift_detected: Optional[bool] = False
+    last_drift_timestamp: Optional[datetime] = None
     first_seen: datetime
     last_seen: datetime
 
@@ -30,6 +37,8 @@ class AssetUpdate(BaseModel):
     criticality: Optional[str] = None
     hostname: Optional[str] = None
     vendor: Optional[str] = None
+    model: Optional[str] = None
+    firmware: Optional[str] = None
 
 class ConnectionSchema(BaseModel):
     id: int
@@ -108,6 +117,13 @@ class TelemetrySchema(BaseModel):
         from_attributes = True
 
 class SimulationTriggerRequest(BaseModel):
-    traffic_type: str # "NORMAL", "UNAUTHORIZED_WRITE", "PORT_SCAN", "HIGH_FREQ_DOS"
+    traffic_type: str # "NORMAL", "UNAUTHORIZED_WRITE", "PORT_SCAN", "TANK_OVERFILL", "CHEMICAL_DOSING", "SENSOR_SPOOFING"
     target_ip: Optional[str] = "192.168.10.10"
     count: Optional[int] = 10
+
+class PlantControlRequest(BaseModel):
+    inflow_valve: Optional[str] = None
+    pump_status: Optional[str] = None
+    target_level: Optional[float] = None
+    relief_valve: Optional[str] = None
+

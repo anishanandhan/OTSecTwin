@@ -78,6 +78,15 @@ def get_asset_digital_twin(db: Session, asset_id: str):
         },
         "vulnerabilities": vulnerabilities,
         "recent_alerts": alert_summary,
+        "accuracy": {
+            "confidence_score": asset.confidence_score or 95.0,
+            "fingerprint_method": asset.fingerprint_method or "Passive Modbus Telemetry",
+            "os_signature": asset.os_signature or "Embedded Controller OS",
+            "config_hash": asset.config_hash,
+            "drift_detected": bool(asset.drift_detected),
+            "last_drift_timestamp": asset.last_drift_timestamp.isoformat() if asset.last_drift_timestamp else None,
+            "hardware_modules": asset.hardware_modules or []
+        },
         "first_seen": asset.first_seen.isoformat(),
         "last_seen": asset.last_seen.isoformat()
     }

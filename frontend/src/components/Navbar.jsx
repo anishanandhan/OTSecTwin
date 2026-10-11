@@ -1,140 +1,134 @@
 import React from "react";
-import { Shield, Activity, Network, Box, AlertTriangle, Play, RefreshCw, Cpu } from "lucide-react";
+import { Shield, Activity, Network, Box, AlertTriangle, Play, RotateCcw, Cpu, Sparkles, Layers, Sliders } from "lucide-react";
 
-export default function Navbar({ activeTab, setActiveTab, alertCount, onTriggerSim, onInjectAttack, onResetLab }) {
+export default function Navbar({ activeTab, setActiveTab, alertCount, onTriggerSim, onInjectAttack, onResetLab, onToggleAiCopilot }) {
+  const tabs = [
+    { id: "overview", label: "Dashboard", icon: Activity },
+    { id: "simulator", label: "LabShock Plant P&ID", icon: Sliders },
+    { id: "assets", label: "Asset Inventory", icon: Box },
+    { id: "topology", label: "Purdue Topology", icon: Network },
+    { id: "vulnerabilities", label: "CVE Matrix", icon: Shield },
+    { id: "alerts", label: "Security Alerts", icon: AlertTriangle, count: alertCount },
+  ];
+
   return (
-    <header className="border-b border-[#1e2d4a] bg-[#0d1424]/90 backdrop-blur-md sticky top-0 z-40 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
-      {/* Brand Logo */}
-      <div className="flex items-center gap-3">
-        <div className="p-2.5 bg-gradient-to-tr from-cyan-600 to-emerald-500 rounded-xl shadow-lg shadow-cyan-500/20 text-white">
-          <Shield className="w-6 h-6 stroke-[2.5]" />
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-extrabold tracking-wide text-white bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
-              OTSecTwin
-            </h1>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300">
-              v1.0 PLATFORM
-            </span>
+    <header className="border-b border-white/10 bg-[#0b0f19] sticky top-0 z-40 px-6 py-2.5">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        {/* Brand Identity */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shadow-sm">
+            <Shield className="w-5 h-5 stroke-[2]" />
           </div>
-          <p className="text-xs text-slate-400 font-medium">
-            OT/ICS Passive Asset Intelligence & Behavioral Anomaly Engine
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-base font-bold tracking-tight text-white font-sans">
+                OTSecTwin
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">
+                v1.2 ENTERPRISE
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 leading-none mt-0.5">
+              Industrial Cyber-Physical Defense & Digital Twin Console
+            </p>
+          </div>
+        </div>
+
+        {/* Primary Navigation Tabs */}
+        <nav className="hidden md:flex items-center gap-1 bg-[#101625] p-1 rounded-lg border border-white/10">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all ${
+                  isActive
+                    ? "bg-[#1d273f] text-white border border-blue-500/30 shadow-sm"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-blue-400" : "text-slate-400"}`} />
+                <span>{tab.label}</span>
+                {tab.count > 0 && (
+                  <span className="ml-1 px-1.5 py-0.2 bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-mono rounded-full font-semibold">
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Action Controls & AI Trigger */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          {/* Telemetry Indicator */}
+          <div className="hidden xl:flex items-center gap-2 bg-[#101625] px-2.5 py-1.5 rounded-md border border-white/10">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[11px] text-slate-300 font-mono">Modbus Telemetry Active</span>
+          </div>
+
+          {/* Quick Simulation Buttons */}
+          <div className="flex items-center bg-[#101625] p-0.5 rounded-md border border-white/10">
+            <button
+              onClick={onTriggerSim}
+              className="px-2.5 py-1 text-slate-300 hover:text-white hover:bg-white/5 rounded text-xs font-medium flex items-center gap-1.5 transition"
+              title="Poll Modbus registers"
+            >
+              <Play className="w-3 h-3 text-emerald-400 fill-emerald-400" />
+              <span>Poll</span>
+            </button>
+            <div className="w-[1px] h-3.5 bg-white/10 mx-0.5" />
+            <button
+              onClick={onInjectAttack}
+              className="px-2.5 py-1 text-slate-300 hover:text-rose-300 hover:bg-rose-500/10 rounded text-xs font-medium flex items-center gap-1.5 transition"
+              title="Inject unauthorized Modbus write attack"
+            >
+              <AlertTriangle className="w-3 h-3 text-rose-400" />
+              <span>Inject</span>
+            </button>
+            <div className="w-[1px] h-3.5 bg-white/10 mx-0.5" />
+            <button
+              onClick={onResetLab}
+              className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded transition"
+              title="Reset lab to default baseline"
+            >
+              <RotateCcw className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* AI Copilot Trigger */}
+          <button
+            onClick={onToggleAiCopilot}
+            className="px-3 py-1.5 bg-[#172138] hover:bg-[#1e2a47] text-white border border-blue-500/30 rounded-md text-xs font-medium flex items-center gap-2 shadow-sm transition group"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-blue-400 group-hover:rotate-12 transition-transform" />
+            <span>AI Copilot</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          </button>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <nav className="flex items-center gap-1.5 bg-[#131c31] p-1 rounded-xl border border-[#1e2d4a]">
-        <button
-          onClick={() => setActiveTab("overview")}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
-            activeTab === "overview"
-              ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30"
-              : "text-slate-400 hover:text-slate-200 hover:bg-[#1a2642]"
-          }`}
-        >
-          <Activity className="w-4 h-4" />
-          Overview
-        </button>
-
-        <button
-          onClick={() => setActiveTab("topology")}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
-            activeTab === "topology"
-              ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30"
-              : "text-slate-400 hover:text-slate-200 hover:bg-[#1a2642]"
-          }`}
-        >
-          <Network className="w-4 h-4" />
-          Topology Map
-        </button>
-
-        <button
-          onClick={() => setActiveTab("assets")}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
-            activeTab === "assets"
-              ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30"
-              : "text-slate-400 hover:text-slate-200 hover:bg-[#1a2642]"
-          }`}
-        >
-          <Box className="w-4 h-4" />
-          Asset Twin
-        </button>
-
-        <button
-          onClick={() => setActiveTab("vulnerabilities")}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
-            activeTab === "vulnerabilities"
-              ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30"
-              : "text-slate-400 hover:text-slate-200 hover:bg-[#1a2642]"
-          }`}
-        >
-          <Shield className="w-4 h-4" />
-          CVE Matrix
-        </button>
-
-        <button
-          onClick={() => setActiveTab("alerts")}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all relative ${
-            activeTab === "alerts"
-              ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30"
-              : "text-slate-400 hover:text-slate-200 hover:bg-[#1a2642]"
-          }`}
-        >
-          <AlertTriangle className="w-4 h-4" />
-          Alerts
-          {alertCount > 0 && (
-            <span className="ml-1 px-1.5 py-0.2 bg-rose-600 text-white text-[10px] font-bold rounded-full animate-pulse">
-              {alertCount}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab("simulator")}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
-            activeTab === "simulator"
-              ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30"
-              : "text-slate-400 hover:text-slate-200 hover:bg-[#1a2642]"
-          }`}
-        >
-          <Cpu className="w-4 h-4" />
-          OT Lab Sim
-        </button>
+      {/* Mobile/Tablet Sub-Navigation */}
+      <nav className="flex md:hidden items-center gap-1 overflow-x-auto pt-2 border-t border-white/5 mt-2">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-2.5 py-1 rounded text-xs font-medium shrink-0 flex items-center gap-1.5 ${
+                isActive ? "bg-blue-600 text-white" : "text-slate-400"
+              }`}
+            >
+              <Icon className="w-3 h-3" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </nav>
-
-      {/* Telemetry Status Indicator & Simulation Triggers */}
-      <div className="flex items-center gap-3">
-        <div className="hidden lg:flex items-center gap-2 bg-[#131c31] px-3 py-1.5 rounded-lg border border-[#1e2d4a]">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400" />
-          <span className="text-xs text-slate-300 font-medium">Telemetry Active</span>
-        </div>
-
-        <button
-          onClick={onTriggerSim}
-          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all"
-        >
-          <Play className="w-3.5 h-3.5 fill-current" />
-          Poll Modbus
-        </button>
-
-        <button
-          onClick={onInjectAttack}
-          className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-md shadow-rose-600/30 transition-all"
-        >
-          <AlertTriangle className="w-3.5 h-3.5" />
-          Inject Attack
-        </button>
-
-        <button
-          onClick={onResetLab}
-          title="Reset OT Lab State"
-          className="p-1.5 bg-[#1a2642] hover:bg-[#25375d] text-slate-300 rounded-lg border border-[#1e2d4a] transition-all"
-        >
-          <RefreshCw className="w-4 h-4" />
-        </button>
-      </div>
     </header>
   );
 }

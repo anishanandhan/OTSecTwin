@@ -1,0 +1,193 @@
+version: '3.8'
+
+volumes:
+  ot_data:
+
+# ==============================================================================
+# OTSecTwin + LabShock-Style OT Cyber Range Environment
+# ==============================================================================
+# This setup emulates an industrial facility with:
+# - Level 1/2: Virtual Modbus PLCs (Water Treatment & Chemical Feed)
+# - Physical Process Simulation (dynamic fluid & pH physics)
+# - Level 3: SCADA / HMI (FUXA Web Industrial Interface)
+# - Red Team Attacker Container (for pentesting and anomaly injection)
+# - OTSecTwin Monitoring Stack (FastAPI backend + React Vite frontend)
+# ==============================================================================
+
+networks:
+  # Purdue Model Level 1 & 2: Real-time Control and Sensor Bus
+  ot_l1_l2_bus:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
+
+  # Purdue Model Level 3: Supervisory Operations & SCADA
+  ot_l3_operations:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.20.0/24
+
+  # Enterprise / DMZ & Monitoring Network
+  it_mgmt_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.30.0/24
+
+services:
+
+  # ----------------------------------------------------------------------------
+  # 1. Level 1/2: PLC-001 (Water Storage & Pump Controller)
+  # ----------------------------------------------------------------------------
+  plc1-water-tank:
+    build:
+      context: ./lab/plc
+      dockerfile: Dockerfile
+    container_name: plc1-water-tank
+    environment:
+      - PLC_NAME=PLC-001-WaterTank
+      - BIND_IP=0.0.0.0
+      - PORT=502
+    networks:
+      ot_l1_l2_bus:
+        ipv4_address: 192.168.10.10
+    ports:
+      - "5020:502"
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # 2. Level 1/2: PLC-002 (Chemical Dosing Controller)
+  # ----------------------------------------------------------------------------
+  plc2-chemical-feed:
+    build:
+      context: ./lab/plc
+      dockerfile: Dockerfile
+    container_name: plc2-chemical-feed
+    environment:
+      - PLC_NAME=PLC-002-ChemicalDosing
+      - BIND_IP=0.0.0.0
+      - PORT=502
+    networks:
+      ot_l1_l2_bus:
+        ipv4_address: 192.168.10.12
+    ports:
+      - "5021:502"
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # 2b. Conpot-Style Decoy Tripwire (Honey-PLC for lateral movement detection)
+  # ----------------------------------------------------------------------------
+  conpot-decoy:
+    build:
+      context: ./lab/honeypot
+      dockerfile: Dockerfile
+    container_name: conpot-decoy
+    environment:
+      - DECOY_NAME=Decoy-Siemens-S7-PLC
+      - BIND_IP=0.0.0.0
+      - PORT=502
+    networks:
+      ot_l1_l2_bus:
+        ipv4_address: 192.168.10.90
+    ports:
+      - "5029:502"
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # 3. Virtual Physical Process Simulation Loop (Fluid & Chemical Dynamics)
+  # ----------------------------------------------------------------------------
+  process-sim:
+    build:
+      context: ./lab/process_sim
+      dockerfile: Dockerfile
+    container_name: ot-process-simulation
+    environment:
+      - PLC1_HOST=192.168.10.10
+      - PLC2_HOST=192.168.10.12
+      - PORT=502
+    depends_on:
+      - plc1-water-tank
+      - plc2-chemical-feed
+    networks:
+      ot_l1_l2_bus:
+        ipv4_address: 192.168.10.30
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # 4. Level 3: SCADA / HMI System (FUXA Web SCADA)
+  # Access at http://localhost:1881
+  # ----------------------------------------------------------------------------
+  fuxa-hmi:
+    image: frangoteam/fuxa:latest
+    container_name: fuxa-hmi
+    ports:
+      - "1881:1881"
+    networks:
+      ot_l3_operations:
+        ipv4_address: 192.168.20.10
+      ot_l1_l2_bus:
+        ipv4_address: 192.168.10.20
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # 5. Red Team / Pentest Attacker Box
+  # Execute attacks via: docker exec -it ot-attacker python attack_toolkit.py write
+  # ----------------------------------------------------------------------------
+  ot-attacker:
+    build:
+      context: ./lab/attacker
+      dockerfile: Dockerfile
+    container_name: ot-attacker
+    depends_on:
+      - plc1-water-tank
+      - plc2-chemical-feed
+    networks:
+      ot_l1_l2_bus:
+        ipv4_address: 192.168.10.99
+      it_mgmt_net:
+        ipv4_address: 192.168.30.99
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # 6. OTSecTwin Platform Backend (FastAPI, Digital Twin & Threat Engine)
+  # Access at http://localhost:8000
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: otsectwin-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ot_data:/app/data
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      it_mgmt_net:
+        ipv4_address: 192.168.30.10
+      ot_l1_l2_bus:
+        ipv4_address: 192.168.10.5
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # 7. OTSecTwin Platform Frontend (React, Vite, Topology Graph)
+  # Access at http://localhost:5173
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: otsectwin-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      it_mgmt_net:
+        ipv4_address: 192.168.30.50
+    restart: unless-stopped

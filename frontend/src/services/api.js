@@ -1,4 +1,9 @@
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL =
+  typeof window !== "undefined" &&
+  window.location.hostname === "localhost" &&
+  (window.location.port === "5173" || window.location.port === "5174" || window.location.port === "3000")
+    ? "http://localhost:8000/api"
+    : "/api";
 
 export async function fetchAssets() {
   const res = await fetch(`${API_BASE_URL}/assets`);
@@ -19,6 +24,22 @@ export async function updateAsset(assetId, data) {
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to update asset");
+  return res.json();
+}
+
+export async function probeAsset(assetId) {
+  const res = await fetch(`${API_BASE_URL}/assets/${assetId}/probe`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to execute safe micro-probe");
+  return res.json();
+}
+
+export async function verifyAssetBaseline(assetId) {
+  const res = await fetch(`${API_BASE_URL}/assets/${assetId}/verify-baseline`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to verify asset baseline");
   return res.json();
 }
 
@@ -100,5 +121,57 @@ export async function resetLab() {
     method: "POST",
   });
   if (!res.ok) throw new Error("Failed to reset lab");
+  return res.json();
+}
+
+export async function fetchPlantState() {
+  const res = await fetch(`${API_BASE_URL}/simulator/plant_state`);
+  if (!res.ok) throw new Error("Failed to fetch plant simulation state");
+  return res.json();
+}
+
+export async function updatePlantControl(controls) {
+  const res = await fetch(`${API_BASE_URL}/simulator/plant_control`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(controls),
+  });
+  if (!res.ok) throw new Error("Failed to apply plant control setpoint");
+  return res.json();
+}
+
+// ==========================================
+// RouterPlus AI Copilot Integration
+// ==========================================
+
+export async function fetchAIStatus() {
+  const res = await fetch(`${API_BASE_URL}/ai/status`);
+  if (!res.ok) throw new Error("Failed to fetch AI status");
+  return res.json();
+}
+
+export async function sendAIChat(message, history = [], context = null) {
+  const res = await fetch(`${API_BASE_URL}/ai/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, history, context }),
+  });
+  if (!res.ok) throw new Error("Failed to send AI chat query");
+  return res.json();
+}
+
+export async function analyzeAlertWithAI(alertId) {
+  const res = await fetch(`${API_BASE_URL}/ai/analyze-alert/${alertId}`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to analyze alert with AI");
+  return res.json();
+}
+
+export async function fetchAssetHardeningWithAI(assetId) {
+  const res = await fetch(`${API_BASE_URL}/ai/asset-hardening/${assetId}`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to fetch asset hardening advice");
   return res.json();
 }

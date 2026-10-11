@@ -51,6 +51,44 @@ def inspect_telemetry_against_baseline(db: Session, src_ip: str, dst_ip: str, fu
     target_asset = db.query(AssetModel).filter(AssetModel.ip == dst_ip).first()
     asset_id = target_asset.id if target_asset else dst_ip
 
+    # Rule 0A: Conpot-style Decoy Tripwire (Honey-PLC triggered)
+    if dst_ip == "192.168.10.90" or "decoy" in str(asset_id).lower():
+        is_anomalous = True
+        alert_id = f"ALT-HONEY-{uuid.uuid4().hex[:6].upper()}"
+        alert = AlertModel(
+            id=alert_id,
+            title="🍯 Critical: Decoy Honey-PLC Touched (Conpot Tripwire)",
+            description=f"Host {src_ip} initiated unauthorized Modbus connection to decoy asset {dst_ip}. This confirms active internal lateral movement or hostile reconnaissance.",
+            severity="CRITICAL",
+            category="Reconnaissance Scan",
+            src_ip=src_ip,
+            dst_ip=dst_ip,
+            asset_id=asset_id,
+            raw_payload={"function_code": function_code, "register_address": register_address, "register_value": register_value},
+            status="NEW",
+            timestamp=datetime.utcnow()
+        )
+        db.add(alert)
+
+    # Rule 0B: GRFICSv3 / Cyber-Physical Threshold Violation (Process Physics Alarm)
+    if register_value is not None and (register_value > 95 or register_value < 0):
+        is_anomalous = True
+        alert_id = f"ALT-PHYS-{uuid.uuid4().hex[:6].upper()}"
+        alert = AlertModel(
+            id=alert_id,
+            title="🌊 Critical: Cyber-Physical Setpoint Out-of-Bounds (GRFICS Alarm)",
+            description=f"Register {register_address or 40001} on {dst_ip} ({asset_id}) was set to {register_value}, exceeding safe operating envelope (0-95). Risk of tank overflow, cavitation, or pipe overpressure.",
+            severity="CRITICAL",
+            category="Safety Violation",
+            src_ip=src_ip,
+            dst_ip=dst_ip,
+            asset_id=asset_id,
+            raw_payload={"function_code": function_code, "register_address": register_address, "register_value": register_value},
+            status="NEW",
+            timestamp=datetime.utcnow()
+        )
+        db.add(alert)
+
     # Scenario A: Unknown / New Source IP pair
     if not rule:
         is_anomalous = True

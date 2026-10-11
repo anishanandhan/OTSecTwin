@@ -65,3 +65,5 @@ Access the platform at `http://localhost:5173`.
 - **Contextual Vulnerability Scoring**: Correlates standard NVD CVSS scores with operational criticality, Purdue zone exposure, and exploitability.
 - **Behavioral Anomaly Engine**: Learns baseline function code policies and alerts on unauthorized PLC writes (FC05/FC06), reconnaissance scans, and rogue hosts.
 - **OT Lab Simulator & PCAP Exporter**: Trigger normal traffic or simulated cyber attacks, upload external `.pcap` captures, or download live `.pcap` files for Wireshark inspection.
+- **RouterPlus AI Cybersecurity Copilot**: Powered by `gpt-4.1-mini`, provides real-time root cause analysis for behavioral alerts, MITRE ATT&CK for ICS mapping, and automated PLC asset hardening guidance.
+

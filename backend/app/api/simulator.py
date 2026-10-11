@@ -4,11 +4,25 @@ from sqlalchemy.orm import Session
 import os
 
 from app.database import get_db
-from app.schemas.schemas import SimulationTriggerRequest
-from app.services.simulator import generate_telemetry_batch, seed_simulated_ot_lab
+from app.schemas.schemas import SimulationTriggerRequest, PlantControlRequest
+from app.services.simulator import generate_telemetry_batch, seed_simulated_ot_lab, get_plant_state, update_plant_control
 from app.config import SAMPLE_PCAP_DIR
 
 router = APIRouter(prefix="/api/simulator", tags=["OT Lab Simulator"])
+
+@router.get("/plant_state")
+def read_plant_state():
+    """
+    Returns live cyber-physical simulation telemetry (water tank, pump, chemical pH, valves, Modbus registers).
+    """
+    return get_plant_state()
+
+@router.post("/plant_control")
+def apply_plant_control(req: PlantControlRequest, db: Session = Depends(get_db)):
+    """
+    Simulates operator HMI setpoint adjustment (inflow valve, pump status, target level).
+    """
+    return update_plant_control(req.model_dump(), db=db)
 
 @router.post("/trigger")
 def trigger_simulation(req: SimulationTriggerRequest, db: Session = Depends(get_db)):
@@ -29,7 +43,8 @@ def reset_lab_environment(db: Session = Depends(get_db)):
     Resets OT Lab environment and re-seeds baseline assets.
     """
     seed_simulated_ot_lab(db)
-    return {"status": "SUCCESS", "message": "OT Lab environment initialized."}
+    generate_telemetry_batch(db, "NORMAL", "192.168.10.10", 5)
+    return {"status": "SUCCESS", "message": "OT Lab environment initialized.", "plant_state": get_plant_state()}
 
 @router.get("/download_pcap")
 def download_sample_pcap():

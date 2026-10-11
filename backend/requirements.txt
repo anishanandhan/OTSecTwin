@@ -6,3 +6,5 @@ scapy>=2.5.0
 requests>=2.31.0
 networkx>=3.2.0
 python-multipart>=0.0.9
+python-dotenv>=1.0.0
+pymodbus>=3.6.8

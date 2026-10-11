@@ -48,7 +48,9 @@ def seed_simulated_ot_lab(db: Session):
         ("192.168.10.21", 502, "Modbus/TCP", "FC03"),
         ("192.168.10.5", 502, "Modbus/TCP", "FC03"),
         ("192.168.10.8", 502, "Modbus/TCP", "FC03"),
-        ("192.168.10.50", 502, "Modbus/TCP", "FC03")
+        ("192.168.10.50", 502, "Modbus/TCP", "FC03"),
+        ("192.168.10.90", 502, "Modbus/TCP", "FC03"),
+        ("192.168.10.18", 502, "Modbus/TCP", "FC03")
     ]
 
     assets = []
@@ -115,14 +117,33 @@ def generate_telemetry_batch(db: Session, traffic_type: str = "NORMAL", target_i
             pkt = IP(src=src, dst=dst)/TCP(sport=log.src_port, dport=502)/Raw(load=payload)
             scapy_packets.append(pkt)
 
-    elif traffic_type == "UNAUTHORIZED_WRITE":
-        # Attacker host issuing unauthorized FC06 Write Single Register
+        # Sync plant state to nominal
+        PLANT_STATE["active_scenario"] = "NORMAL"
+        PLANT_STATE["alarm_state"] = "NOMINAL"
+        PLANT_STATE["tank_level"] = 68.5
+        PLANT_STATE["pressure_bar"] = 2.8
+        PLANT_STATE["chemical_ph"] = 7.2
+        PLANT_STATE["pump_status"] = "RUNNING"
+        PLANT_STATE["pump_rpm"] = 1450
+        PLANT_STATE["relief_valve"] = "CLOSED"
+
+    elif traffic_type in ["TANK_OVERFILL", "UNAUTHORIZED_WRITE"]:
+        # Attacker host forcing PLC-001 (192.168.10.10) pump to 100% and relief valve closed
         attacker_ip = "10.10.10.55"
         discover_or_update_asset(db, attacker_ip, 502, "Modbus/TCP", "FC06")
 
+        PLANT_STATE["active_scenario"] = "TANK_OVERFILL"
+        PLANT_STATE["tank_level"] = 98.4
+        PLANT_STATE["inlet_flow"] = 82.0
+        PLANT_STATE["pump_rpm"] = 1800
+        PLANT_STATE["pump_status"] = "RUNNING"
+        PLANT_STATE["relief_valve"] = "CLOSED"
+        PLANT_STATE["pressure_bar"] = 6.2
+        PLANT_STATE["alarm_state"] = "CRITICAL_OVERFLOW"
+
         for i in range(count):
             addr = 40001 + i
-            val = 9999 # Malicious override value
+            val = 9999 if traffic_type == "UNAUTHORIZED_WRITE" else (98 if addr == 40001 else 1)
             is_anom = inspect_telemetry_against_baseline(db, attacker_ip, target_ip, "FC06", addr, val)
             record_connection(db, attacker_ip, target_ip, "Modbus/TCP", 502, "FC06", is_authorized=False)
 
@@ -134,7 +155,80 @@ def generate_telemetry_batch(db: Session, traffic_type: str = "NORMAL", target_i
                 dst_port=502,
                 protocol="Modbus/TCP",
                 function_code="FC06",
-                func_name="Write Single Register",
+                func_name="Write Single Register (Attack Override)",
+                unit_id=1,
+                register_address=addr,
+                register_value=val,
+                is_anomalous=True
+            )
+            db.add(log)
+            generated_logs.append(log)
+
+            payload = create_modbus_tcp_frame(1, 6, addr, val)
+            pkt = IP(src=attacker_ip, dst=target_ip)/TCP(sport=log.src_port, dport=502)/Raw(load=payload)
+            scapy_packets.append(pkt)
+
+    elif traffic_type == "CHEMICAL_DOSING":
+        # Attacker targeting PLC-002 (192.168.10.12) to sabotage chemical treatment / pH
+        attacker_ip = "10.10.10.55"
+        chem_target = "192.168.10.12"
+        discover_or_update_asset(db, attacker_ip, 502, "Modbus/TCP", "FC06")
+
+        PLANT_STATE["active_scenario"] = "CHEMICAL_DOSING"
+        PLANT_STATE["chemical_ph"] = 3.2
+        PLANT_STATE["alarm_state"] = "CRITICAL_pH_ACID"
+
+        for i in range(count):
+            addr = 40005
+            val = 32  # pH 3.2 (toxic acid overdose)
+            is_anom = inspect_telemetry_against_baseline(db, attacker_ip, chem_target, "FC06", addr, val)
+            record_connection(db, attacker_ip, chem_target, "Modbus/TCP", 502, "FC06", is_authorized=False)
+
+            log = TelemetryLogModel(
+                timestamp=datetime.utcnow(),
+                src_ip=attacker_ip,
+                dst_ip=chem_target,
+                src_port=random.randint(49152, 65535),
+                dst_port=502,
+                protocol="Modbus/TCP",
+                function_code="FC06",
+                func_name="Write Single Register (pH Sabotage)",
+                unit_id=1,
+                register_address=addr,
+                register_value=val,
+                is_anomalous=True
+            )
+            db.add(log)
+            generated_logs.append(log)
+
+            payload = create_modbus_tcp_frame(1, 6, addr, val)
+            pkt = IP(src=attacker_ip, dst=chem_target)/TCP(sport=log.src_port, dport=502)/Raw(load=payload)
+            scapy_packets.append(pkt)
+
+    elif traffic_type == "SENSOR_SPOOFING":
+        # Attacker spoofing LIT-101 level sensor to read 20% while physical tank fills
+        attacker_ip = "10.10.10.55"
+        discover_or_update_asset(db, attacker_ip, 502, "Modbus/TCP", "FC06")
+
+        PLANT_STATE["active_scenario"] = "SENSOR_SPOOFING"
+        PLANT_STATE["tank_level"] = 92.0
+        PLANT_STATE["alarm_state"] = "WARNING_SPOOFED_SENSOR"
+
+        for i in range(count):
+            addr = 40001
+            val = 20  # Spoofed low level to force continuous pumping
+            is_anom = inspect_telemetry_against_baseline(db, attacker_ip, target_ip, "FC06", addr, val)
+            record_connection(db, attacker_ip, target_ip, "Modbus/TCP", 502, "FC06", is_authorized=False)
+
+            log = TelemetryLogModel(
+                timestamp=datetime.utcnow(),
+                src_ip=attacker_ip,
+                dst_ip=target_ip,
+                src_port=random.randint(49152, 65535),
+                dst_port=502,
+                protocol="Modbus/TCP",
+                function_code="FC06",
+                func_name="Write Single Register (Sensor Spoof)",
                 unit_id=1,
                 register_address=addr,
                 register_value=val,
@@ -191,5 +285,87 @@ def generate_telemetry_batch(db: Session, traffic_type: str = "NORMAL", target_i
         "status": "SUCCESS",
         "generated_count": len(generated_logs),
         "traffic_type": traffic_type,
-        "pcap_saved": pcap_path
+        "pcap_saved": pcap_path,
+        "plant_state": get_plant_state()
     }
+
+# ==============================================================================
+# Cyber-Physical Plant Process State (LabShock / GRFICS Digital Twin Model)
+# ==============================================================================
+PLANT_STATE = {
+    "tank_level": 68.5,            # % (0 - 100)
+    "target_level": 70.0,          # %
+    "inlet_flow": 45.2,            # L/min
+    "pump_rpm": 1450,              # RPM
+    "pump_status": "RUNNING",      # RUNNING / STOPPED
+    "inflow_valve": "OPEN",        # OPEN / CLOSED
+    "relief_valve": "CLOSED",      # OPEN / CLOSED
+    "chemical_ph": 7.2,            # pH (nominal 6.8 - 7.6)
+    "pressure_bar": 2.8,           # bar (nominal 2.0 - 3.5)
+    "alarm_state": "NOMINAL",      # NOMINAL / WARNING / CRITICAL_OVERFLOW / CRITICAL_pH_ACID
+    "active_scenario": "NORMAL",
+    "modbus_registers": {
+        40001: 69,
+        40002: 452,
+        40003: 28,
+        40004: 1,
+        40005: 72,
+        40006: 0
+    },
+    "last_updated": datetime.utcnow().isoformat()
+}
+
+def get_plant_state():
+    """
+    Returns live cyber-physical simulation state with real-time Modbus register map.
+    """
+    if PLANT_STATE["active_scenario"] == "NORMAL":
+        PLANT_STATE["tank_level"] = round(max(10.0, min(95.0, PLANT_STATE["tank_level"] + random.uniform(-0.4, 0.4))), 1)
+        PLANT_STATE["inlet_flow"] = round(max(0.0, min(80.0, PLANT_STATE["inlet_flow"] + random.uniform(-0.8, 0.8))), 1)
+        PLANT_STATE["pressure_bar"] = round(max(1.5, min(4.0, 2.8 + (PLANT_STATE["tank_level"] - 50.0) * 0.02)), 2)
+        PLANT_STATE["chemical_ph"] = round(max(6.8, min(7.6, 7.2 + random.uniform(-0.05, 0.05))), 2)
+
+    PLANT_STATE["modbus_registers"] = {
+        40001: int(PLANT_STATE["tank_level"]),
+        40002: int(PLANT_STATE["inlet_flow"] * 10),
+        40003: int(PLANT_STATE["pressure_bar"] * 10),
+        40004: 1 if PLANT_STATE["pump_status"] == "RUNNING" else 0,
+        40005: int(PLANT_STATE["chemical_ph"] * 10),
+        40006: 1 if PLANT_STATE["relief_valve"] == "OPEN" else 0
+    }
+    PLANT_STATE["last_updated"] = datetime.utcnow().isoformat()
+    return dict(PLANT_STATE)
+
+def update_plant_control(controls: dict, db: Session):
+    """
+    Updates operator control setpoints on the physical plant.
+    """
+    if "inflow_valve" in controls and controls["inflow_valve"] is not None:
+        PLANT_STATE["inflow_valve"] = controls["inflow_valve"]
+        PLANT_STATE["inlet_flow"] = 48.0 if controls["inflow_valve"] == "OPEN" else 0.0
+    if "pump_status" in controls and controls["pump_status"] is not None:
+        PLANT_STATE["pump_status"] = controls["pump_status"]
+        PLANT_STATE["pump_rpm"] = 1450 if controls["pump_status"] == "RUNNING" else 0
+    if "target_level" in controls and controls["target_level"] is not None:
+        PLANT_STATE["target_level"] = float(controls["target_level"])
+    if "relief_valve" in controls and controls["relief_valve"] is not None:
+        PLANT_STATE["relief_valve"] = controls["relief_valve"]
+
+    log = TelemetryLogModel(
+        timestamp=datetime.utcnow(),
+        src_ip="192.168.10.20",
+        dst_ip="192.168.10.10",
+        src_port=50200,
+        dst_port=502,
+        protocol="Modbus/TCP",
+        function_code="FC06",
+        func_name="Write Single Register (Operator HMI Command)",
+        unit_id=1,
+        register_address=40004,
+        register_value=1 if PLANT_STATE["pump_status"] == "RUNNING" else 0,
+        is_anomalous=False
+    )
+    db.add(log)
+    db.commit()
+    return get_plant_state()
+

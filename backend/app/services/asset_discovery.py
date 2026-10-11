@@ -1,6 +1,11 @@
 from sqlalchemy.orm import Session
 from app.models.db_models import AssetModel
 from datetime import datetime
+from app.services.asset_accuracy_engine import (
+    calculate_asset_accuracy_fingerprint,
+    compute_asset_configuration_hash,
+    evaluate_configuration_drift
+)
 
 # Fingerprinting dictionaries
 KNOWN_LAB_PROFILES = {
@@ -92,6 +97,28 @@ KNOWN_LAB_PROFILES = {
         "criticality": "HIGH",
         "mac": "00:28:F8:77:10:50"
     },
+    "192.168.10.90": {
+        "id": "DECOY-PLC-001",
+        "hostname": "honey-siemens-s7-decoy",
+        "asset_type": "Honeypot Decoy",
+        "vendor": "Siemens (Conpot Emulated)",
+        "model": "S7-300 / Conpot Tripwire",
+        "firmware": "v3.3.12",
+        "zone": "Deception (Purdue L1)",
+        "criticality": "CRITICAL",
+        "mac": "00:1E:68:DE:10:90"
+    },
+    "192.168.10.18": {
+        "id": "PLC-CLICK-001",
+        "hostname": "plc-automationdirect-click",
+        "asset_type": "PLC",
+        "vendor": "AutomationDirect",
+        "model": "CLICK PLUS C0-10DD1E-D",
+        "firmware": "v3.31",
+        "zone": "Control (Purdue L1)",
+        "criticality": "MEDIUM",
+        "mac": "00:08:4F:A1:10:18"
+    },
     "10.10.10.55": {
         "id": "ATTACKER-001",
         "hostname": "unauthorized-rogue-host",
@@ -132,24 +159,51 @@ def discover_or_update_asset(db: Session, ip: str, port: int = 502, protocol: st
         model = profile.get("model", "Unknown Model")
         firmware = profile.get("firmware", "v1.0")
         hostname = profile.get("hostname", f"host-{ip}")
-        mac = profile.get("mac", f"02:00:00:{ip.replace('.', ':')[-8:]}")
+        # Deep Fingerprint Accuracy Assessment
+        accuracy = calculate_asset_accuracy_fingerprint(
+            ip=ip,
+            mac=mac,
+            open_ports=[port] if port else [],
+            protocols=[protocol] if protocol else [],
+            fc_list=[function_code] if function_code else None
+        )
+
+        final_vendor = vendor if vendor != "Unknown OT Vendor" else accuracy["vendor"]
+        final_model = model if model != "Unknown Model" else accuracy["model"]
+        final_type = asset_type if asset_type != "Unknown" else accuracy["asset_type"]
+
+        initial_hash = compute_asset_configuration_hash(
+            ip=ip,
+            mac=mac,
+            vendor=final_vendor,
+            model=final_model,
+            firmware=firmware,
+            open_ports=[port] if port else [],
+            protocols=[protocol] if protocol else []
+        )
 
         asset = AssetModel(
             id=asset_id,
             ip=ip,
             mac=mac,
             hostname=hostname,
-            asset_type=asset_type,
-            vendor=vendor,
-            model=model,
+            asset_type=final_type,
+            vendor=final_vendor,
+            model=final_model,
             firmware=firmware,
             zone=zone,
             criticality=criticality,
             status="ONLINE",
             protocols=[protocol],
             open_ports=[port] if port else [],
-            risk_score=15.0 if asset_type == "PLC" else 5.0,
+            risk_score=15.0 if final_type == "PLC" else 5.0,
             risk_level="LOW",
+            fingerprint_method=accuracy["fingerprint_method"],
+            confidence_score=accuracy["confidence_score"],
+            os_signature=accuracy["os_signature"],
+            hardware_modules=accuracy["hardware_modules"],
+            config_hash=initial_hash,
+            drift_detected=False,
             first_seen=datetime.utcnow(),
             last_seen=datetime.utcnow()
         )
@@ -168,6 +222,40 @@ def discover_or_update_asset(db: Session, ip: str, port: int = 502, protocol: st
         if port and port not in ports:
             ports.append(port)
             asset.open_ports = ports
+
+        # Ensure existing assets have full accuracy fingerprints and baseline hashes populated
+        if not asset.hardware_modules or not asset.config_hash:
+            accuracy = calculate_asset_accuracy_fingerprint(
+                ip=asset.ip,
+                mac=asset.mac,
+                open_ports=asset.open_ports or [],
+                protocols=asset.protocols or []
+            )
+            if not asset.hardware_modules:
+                asset.hardware_modules = accuracy.get("hardware_modules", [])
+            if not asset.confidence_score:
+                asset.confidence_score = accuracy.get("confidence_score", 95.0)
+            if not asset.fingerprint_method or asset.fingerprint_method == "Passive Modbus Telemetry":
+                asset.fingerprint_method = accuracy.get("fingerprint_method", "Passive Protocol Telemetry")
+            if not asset.os_signature:
+                asset.os_signature = accuracy.get("os_signature", "Embedded Controller OS")
+            if not asset.config_hash:
+                asset.config_hash = compute_asset_configuration_hash(
+                    ip=asset.ip,
+                    mac=asset.mac,
+                    vendor=asset.vendor,
+                    model=asset.model,
+                    firmware=asset.firmware,
+                    open_ports=asset.open_ports or [],
+                    protocols=asset.protocols or []
+                )
+
+        # Check for Configuration Drift
+        if asset.config_hash:
+            drifted, summary = evaluate_configuration_drift(asset, asset.config_hash)
+            if drifted and not asset.drift_detected:
+                asset.drift_detected = True
+                asset.last_drift_timestamp = datetime.utcnow()
 
     db.commit()
     db.refresh(asset)

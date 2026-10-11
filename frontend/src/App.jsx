@@ -7,6 +7,9 @@ import DigitalTwinModal from "./components/DigitalTwinModal";
 import VulnerabilityMatrix from "./components/VulnerabilityMatrix";
 import BehavioralAlerts from "./components/BehavioralAlerts";
 import TelemetrySimulator from "./components/TelemetrySimulator";
+import CyberPhysicalLab from "./components/CyberPhysicalLab";
+import AICopilotDrawer from "./components/AICopilotDrawer";
+import { Sparkles } from "lucide-react";
 
 import {
   fetchAssets,
@@ -29,6 +32,7 @@ export default function App() {
   const [alerts, setAlerts] = useState([]);
   const [selectedAssetId, setSelectedAssetId] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [isAiCopilotOpen, setIsAiCopilotOpen] = useState(false);
 
   const loadAllData = useCallback(async () => {
     try {
@@ -102,12 +106,34 @@ export default function App() {
         onTriggerSim={handleTriggerNormalSim}
         onInjectAttack={handleInjectAttack}
         onResetLab={handleResetLab}
+        onToggleAiCopilot={() => setIsAiCopilotOpen((prev) => !prev)}
+      />
+
+      {/* Floating AI Copilot Quick Launcher Button */}
+      {!isAiCopilotOpen && (
+        <button
+          onClick={() => setIsAiCopilotOpen(true)}
+          className="fixed bottom-6 right-6 z-40 px-3.5 py-2 bg-[#172138] hover:bg-[#1e2a47] text-white text-xs font-medium rounded-full shadow-xl border border-blue-500/30 flex items-center gap-2 group transition-all"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-blue-400 group-hover:rotate-12 transition-transform" />
+          <span>AI Copilot</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+        </button>
+      )}
+
+      {/* AI Copilot Side Drawer (RouterPlus) */}
+      <AICopilotDrawer
+        isOpen={isAiCopilotOpen}
+        onClose={() => setIsAiCopilotOpen(false)}
+        alerts={alerts}
+        assets={assets}
       />
 
       {/* Floating Notification Toast */}
       {notification && (
-        <div className="fixed bottom-5 right-5 z-50 px-4 py-2.5 bg-cyan-950 border border-cyan-500/50 text-cyan-200 text-xs font-semibold rounded-xl shadow-2xl animate-bounce">
-          {notification}
+        <div className="fixed bottom-5 right-5 z-50 px-4 py-2 bg-[#121828] border border-white/10 text-slate-100 text-xs font-medium rounded-md shadow-2xl flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+          <span>{notification}</span>
         </div>
       )}
 
@@ -136,6 +162,7 @@ export default function App() {
           <AssetInventory
             assets={assets}
             onSelectAsset={setSelectedAssetId}
+            onRefresh={loadAllData}
           />
         )}
 
@@ -156,9 +183,10 @@ export default function App() {
         )}
 
         {activeTab === "simulator" && (
-          <TelemetrySimulator
-            onSimulationTriggered={loadAllData}
-          />
+          <div className="space-y-6">
+            <CyberPhysicalLab onAnomalyDetected={loadAllData} />
+            <TelemetrySimulator onSimulationTriggered={loadAllData} />
+          </div>
         )}
       </main>
 

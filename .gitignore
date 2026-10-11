@@ -46,3 +46,11 @@ frontend/dist-ssr/
 # Databases & local PCAPs
 backend/data/*.db
 backend/data/sample_pcap/*.pcap
+
+# Environment variables & secrets
+.env
+.env.*
+*.env
+backend/.env
+!.env.example
+!backend/.env.example

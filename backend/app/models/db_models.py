@@ -22,6 +22,13 @@ class AssetModel(Base):
     risk_score = Column(Float, default=0.0) # 0.0 - 100.0
     risk_level = Column(String, default="LOW") # LOW, MEDIUM, HIGH, CRITICAL
     risk_breakdown = Column(JSON, default=dict) # Human-readable breakdown of factors
+    fingerprint_method = Column(String, default="Passive Modbus Telemetry")
+    confidence_score = Column(Float, default=95.0) # Accuracy confidence percentage (0-100%)
+    os_signature = Column(String, default="Embedded Controller OS")
+    hardware_modules = Column(JSON, default=list) # Backplane rack slots & I/O cards
+    config_hash = Column(String, nullable=True) # Cryptographic baseline hash
+    drift_detected = Column(Boolean, default=False) # Flags unauthorized configuration changes
+    last_drift_timestamp = Column(DateTime, nullable=True)
     first_seen = Column(DateTime, default=datetime.utcnow)
     last_seen = Column(DateTime, default=datetime.utcnow)
 

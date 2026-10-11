@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { X, Box, Shield, Activity, Network, Code, Save, CheckCircle2, AlertTriangle, Cpu } from "lucide-react";
-import { fetchDigitalTwin, updateAsset } from "../services/api";
+import { X, Box, Shield, Activity, Network, Code, Save, CheckCircle2, AlertTriangle, Cpu, Sparkles, Server, Layers, ShieldCheck } from "lucide-react";
+import { fetchDigitalTwin, updateAsset, fetchAssetHardeningWithAI, verifyAssetBaseline } from "../services/api";
 
 export default function DigitalTwinModal({ assetId, onClose, onAssetUpdated }) {
   const [twin, setTwin] = useState(null);
@@ -9,6 +9,36 @@ export default function DigitalTwinModal({ assetId, onClose, onAssetUpdated }) {
   const [zone, setZone] = useState("");
   const [criticality, setCriticality] = useState("");
   const [saving, setSaving] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [aiHardening, setAiHardening] = useState(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+
+  const handleVerifyBaseline = async () => {
+    setVerifying(true);
+    try {
+      await verifyAssetBaseline(assetId);
+      const updated = await fetchDigitalTwin(assetId);
+      setTwin(updated);
+      onAssetUpdated();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleFetchAiHardening = async () => {
+    if (aiHardening) return;
+    setLoadingAi(true);
+    try {
+      const res = await fetchAssetHardeningWithAI(assetId);
+      setAiHardening(res);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingAi(false);
+    }
+  };
 
   useEffect(() => {
     if (!assetId) return;
@@ -105,6 +135,20 @@ export default function DigitalTwinModal({ assetId, onClose, onAssetUpdated }) {
           >
             <Code className="w-4 h-4" /> Raw Twin JSON
           </button>
+
+          <button
+            onClick={() => {
+              setActiveTab("ai");
+              handleFetchAiHardening();
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              activeTab === "ai"
+                ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-600/30"
+                : "text-cyan-400 hover:text-cyan-200 hover:bg-[#16233d]"
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-cyan-300" /> AI Hardening Advisor
+          </button>
         </div>
 
         {/* Modal Body */}
@@ -135,6 +179,83 @@ export default function DigitalTwinModal({ assetId, onClose, onAssetUpdated }) {
                       <p className="text-sm font-bold text-white">{twin.firmware}</p>
                     </div>
                   </div>
+
+                  {/* Accuracy Intelligence & Configuration Drift Banner */}
+                  <div className="p-4 bg-gradient-to-r from-[#0c1830] to-[#111f3d] rounded-xl border border-cyan-500/30 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2d4a] pb-2">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                          Ground-Truth Accuracy: {twin.accuracy?.confidence_score || 95}% Confidence
+                        </h4>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {twin.accuracy?.drift_detected ? (
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-rose-950 text-rose-300 border border-rose-500/50 rounded-full text-[10px] font-extrabold animate-pulse">
+                              ⚠️ Config Drift Detected
+                            </span>
+                            <button
+                              onClick={handleVerifyBaseline}
+                              disabled={verifying}
+                              className="px-2.5 py-0.5 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-[10px] font-bold transition"
+                            >
+                              {verifying ? "Locking..." : "Verify Baseline"}
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-emerald-950 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] font-semibold">
+                            ✓ Baseline State Locked
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                      <div>
+                        <span className="text-slate-400 block text-[10px] uppercase font-semibold">Methodology</span>
+                        <span className="text-cyan-300 font-medium font-mono text-[11px]">
+                          {twin.accuracy?.fingerprint_method || "Modbus DPI + MAC OUI"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px] uppercase font-semibold">OS / RTOS Stack</span>
+                        <span className="text-slate-200 font-medium">
+                          {twin.accuracy?.os_signature || "Embedded Industrial RTOS"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px] uppercase font-semibold">Integrity Hash</span>
+                        <span className="text-slate-400 font-mono text-[10px]">
+                          {twin.accuracy?.config_hash ? twin.accuracy.config_hash.slice(0, 18) + "..." : "sha256-computed"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chassis Backplane & Rack Sub-Modules */}
+                  {twin.accuracy?.hardware_modules && twin.accuracy.hardware_modules.length > 0 && (
+                    <div className="p-4 bg-[#10192e] rounded-xl border border-[#1e2d4a] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                          <Layers className="w-4 h-4 text-cyan-400" /> Chassis Backplane Rack Modules ({twin.accuracy.hardware_modules.length} Slots)
+                        </h4>
+                        <span className="text-[10px] font-mono text-slate-400">Level 0/1 Physical Backplane</span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                        {twin.accuracy.hardware_modules.map((mod, idx) => (
+                          <div key={idx} className="p-2.5 bg-[#0a1122] border border-[#1e2d4a] rounded-lg space-y-1">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="font-bold text-cyan-300">Slot {mod.slot}</span>
+                              <span className="px-1 py-0.2 bg-emerald-950 text-emerald-400 rounded text-[9px] font-semibold">{mod.status}</span>
+                            </div>
+                            <p className="text-[11px] font-semibold text-white truncate">{mod.name}</p>
+                            <p className="text-[10px] text-slate-400 font-mono truncate">{mod.catalog}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Explainable Risk Engine Breakdown */}
                   <div className="p-4 bg-slate-900/80 rounded-xl border border-[#1e2d4a] space-y-3">
@@ -264,6 +385,46 @@ export default function DigitalTwinModal({ assetId, onClose, onAssetUpdated }) {
                 <pre className="p-4 bg-[#080c14] rounded-xl border border-[#1e2d4a] text-xs font-mono text-emerald-400 overflow-x-auto max-h-96">
                   {JSON.stringify(twin, null, 2)}
                 </pre>
+              )}
+
+              {/* Tab 5: AI Hardening Advisor */}
+              {activeTab === "ai" && (
+                <div className="space-y-4">
+                  {loadingAi ? (
+                    <div className="p-12 text-center text-cyan-400 flex flex-col items-center gap-3">
+                      <Sparkles className="w-8 h-8 animate-spin" />
+                      <p className="text-sm font-semibold">
+                        Consulting RouterPlus ({twin.vendor} {twin.model} Hardening Blueprint)...
+                      </p>
+                    </div>
+                  ) : aiHardening ? (
+                    <div className="p-5 bg-[#0a101f] border border-cyan-500/30 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between border-b border-[#1e2d4a] pb-2">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-5 h-5 text-cyan-400" />
+                          <h4 className="text-sm font-bold text-white">
+                            RouterPlus Hardening & Defensive Advisory ({aiHardening.model})
+                          </h4>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400">
+                          {new Date(aiHardening.timestamp).toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed prose prose-invert max-w-none">
+                        {aiHardening.recommendations_markdown}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center text-slate-400">
+                      <button
+                        onClick={handleFetchAiHardening}
+                        className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold transition"
+                      >
+                        Generate Hardening Report
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </>
           )}

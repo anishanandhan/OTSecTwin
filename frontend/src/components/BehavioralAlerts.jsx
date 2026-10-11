@@ -1,9 +1,24 @@
 import React, { useState } from "react";
-import { AlertTriangle, ShieldAlert, CheckCircle2, Clock, Filter, Radio, RefreshCw } from "lucide-react";
+import { AlertTriangle, ShieldAlert, CheckCircle2, Clock, Filter, Radio, RefreshCw, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { analyzeAlertWithAI } from "../services/api";
 
 export default function BehavioralAlerts({ alerts, onAcknowledge, onResolve, onRefresh }) {
   const [selectedSeverity, setSelectedSeverity] = useState("ALL");
   const [selectedStatus, setSelectedStatus] = useState("ALL");
+  const [aiReports, setAiReports] = useState({});
+  const [loadingAi, setLoadingAi] = useState({});
+
+  const handleRunAiAnalysis = async (alertId) => {
+    setLoadingAi((prev) => ({ ...prev, [alertId]: true }));
+    try {
+      const res = await analyzeAlertWithAI(alertId);
+      setAiReports((prev) => ({ ...prev, [alertId]: res }));
+    } catch (err) {
+      alert(`AI Analysis Failed: ${err.message}`);
+    } finally {
+      setLoadingAi((prev) => ({ ...prev, [alertId]: false }));
+    }
+  };
 
   const filteredAlerts = alerts.filter((a) => {
     const matchesSev = selectedSeverity === "ALL" || a.severity === selectedSeverity;
@@ -76,17 +91,17 @@ export default function BehavioralAlerts({ alerts, onAcknowledge, onResolve, onR
           </div>
         ) : (
           filteredAlerts.map((alt) => (
-            <div
-              key={alt.id}
-              className={`glass-card p-5 border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${
-                alt.severity === "CRITICAL"
-                  ? "border-rose-500/50 bg-rose-950/20 glow-crimson"
-                  : alt.severity === "HIGH"
-                  ? "border-amber-500/50 bg-amber-950/15"
-                  : "border-[#1e2d4a]"
-              }`}
-            >
-              <div className="flex items-start gap-4">
+            <div key={alt.id} className="space-y-2">
+              <div
+                className={`glass-card p-5 border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${
+                  alt.severity === "CRITICAL"
+                    ? "border-rose-500/50 bg-rose-950/20 glow-crimson"
+                    : alt.severity === "HIGH"
+                    ? "border-amber-500/50 bg-amber-950/15"
+                    : "border-[#1e2d4a]"
+                }`}
+              >
+                <div className="flex items-start gap-4">
                 <div className={`p-3 rounded-xl mt-1 ${
                   alt.severity === "CRITICAL" ? "bg-rose-600 text-white shadow-lg shadow-rose-600/40" : "bg-amber-600 text-white"
                 }`}>
@@ -123,7 +138,17 @@ export default function BehavioralAlerts({ alerts, onAcknowledge, onResolve, onR
               </div>
 
               {/* Action Buttons */}
-              <div className="flex md:flex-col items-center gap-2 self-end md:self-center">
+              <div className="flex flex-wrap md:flex-col items-center gap-2 self-end md:self-center shrink-0">
+                <button
+                  onClick={() => handleRunAiAnalysis(alt.id)}
+                  disabled={loadingAi[alt.id]}
+                  className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-900 to-blue-900 hover:from-cyan-850 hover:to-blue-850 border border-cyan-400/50 text-cyan-200 text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-cyan-900/20 transition-all disabled:opacity-50"
+                  title="Trigger Root Cause Analysis with RouterPlus LLM"
+                >
+                  <Sparkles className={`w-3.5 h-3.5 text-cyan-400 ${loadingAi[alt.id] ? "animate-spin" : ""}`} />
+                  {loadingAi[alt.id] ? "Analyzing..." : aiReports[alt.id] ? "Re-Analyze AI" : "AI Root Cause"}
+                </button>
+
                 {alt.status === "NEW" && (
                   <button
                     onClick={() => onAcknowledge(alt.id)}
@@ -148,6 +173,27 @@ export default function BehavioralAlerts({ alerts, onAcknowledge, onResolve, onR
                   </span>
                 )}
               </div>
+            </div>
+
+            {/* AI Incident Analysis Report (RouterPlus) */}
+            {aiReports[alt.id] && (
+              <div className="mt-2 p-4 bg-[#0a101f] border border-cyan-500/30 rounded-xl space-y-2 shadow-xl animate-in fade-in duration-200">
+                <div className="flex items-center justify-between border-b border-[#1e2d4a] pb-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-cyan-400" />
+                    <span className="text-xs font-bold text-cyan-200 uppercase tracking-wider">
+                      RouterPlus AI Incident Report ({aiReports[alt.id].model})
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    Generated: {new Date(aiReports[alt.id].timestamp).toLocaleTimeString()}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed font-sans prose prose-invert max-w-none">
+                  {aiReports[alt.id].analysis_markdown}
+                </div>
+              </div>
+            )}
             </div>
           ))
         )}
