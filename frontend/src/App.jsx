@@ -9,9 +9,7 @@ import BehavioralAlerts from "./components/BehavioralAlerts";
 import TelemetrySimulator from "./components/TelemetrySimulator";
 import CyberPhysicalLab from "./components/CyberPhysicalLab";
 import AICopilotDrawer from "./components/AICopilotDrawer";
-import ResearcherDossierModal from "./components/ResearcherDossierModal";
-import PortfolioHub from "./components/PortfolioHub";
-import { Sparkles, Sliders, Shield, ArrowRight, X, ExternalLink, Award } from "lucide-react";
+import { Sparkles, Sliders, ArrowRight, X, ExternalLink } from "lucide-react";
 
 import {
   fetchAssets,
@@ -35,7 +33,6 @@ export default function App() {
   const [selectedAssetId, setSelectedAssetId] = useState(null);
   const [notification, setNotification] = useState(null);
   const [isAiCopilotOpen, setIsAiCopilotOpen] = useState(false);
-  const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [showExitBar, setShowExitBar] = useState(false);
   const [exitBarDismissed, setExitBarDismissed] = useState(false);
 
@@ -64,10 +61,9 @@ export default function App() {
     return () => clearInterval(interval);
   }, [loadAllData]);
 
-  // Global Keyboard Navigation & Accessibility (Layer 5)
+  // Global Keyboard Navigation & Accessibility
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore if user is typing in an input or textarea
       if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
         if (e.key === "Escape") {
           document.activeElement.blur();
@@ -81,7 +77,6 @@ export default function App() {
       } else if (e.key === "Escape") {
         setIsAiCopilotOpen(false);
         setSelectedAssetId(null);
-        setIsDossierOpen(false);
       } else if (e.key === "1") {
         setActiveTab("overview");
       } else if (e.key === "2") {
@@ -101,7 +96,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Exit Intent / Scroll Recovery Trigger (Layer 3)
+  // Exit Intent / Scroll Recovery Trigger
   useEffect(() => {
     const handleScroll = () => {
       if (exitBarDismissed) return;
@@ -169,7 +164,6 @@ export default function App() {
         onInjectAttack={handleInjectAttack}
         onResetLab={handleResetLab}
         onToggleAiCopilot={() => setIsAiCopilotOpen((prev) => !prev)}
-        onOpenDossier={() => setIsDossierOpen(true)}
       />
 
       {/* Floating AI Copilot Quick Launcher Button */}
@@ -193,12 +187,6 @@ export default function App() {
         assets={assets}
       />
 
-      {/* Researcher Dossier Modal */}
-      <ResearcherDossierModal
-        isOpen={isDossierOpen}
-        onClose={() => setIsDossierOpen(false)}
-      />
-
       {/* Floating Notification Toast */}
       {notification && (
         <div className="fixed bottom-5 right-5 z-50 px-4 py-2 bg-[#121828] border border-white/10 text-slate-100 text-xs font-medium rounded-md shadow-2xl flex items-center gap-2">
@@ -208,7 +196,7 @@ export default function App() {
       )}
 
       {/* Main Content Area */}
-      <main id="main-content" className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+      <main id="main-content" className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto space-y-6">
         {activeTab === "overview" && (
           <DashboardOverview
             assets={assets}
@@ -217,7 +205,6 @@ export default function App() {
             onSelectAsset={setSelectedAssetId}
             onAcknowledgeAlert={handleAcknowledgeAlert}
             setActiveTab={setActiveTab}
-            onOpenDossier={() => setIsDossierOpen(true)}
           />
         )}
 
@@ -226,10 +213,6 @@ export default function App() {
             <CyberPhysicalLab onAnomalyDetected={loadAllData} />
             <TelemetrySimulator onSimulationTriggered={loadAllData} />
           </div>
-        )}
-
-        {activeTab === "portfolio" && (
-          <PortfolioHub onNavigateToPlantLab={() => setActiveTab("simulator")} />
         )}
 
         {activeTab === "assets" && (
@@ -274,7 +257,7 @@ export default function App() {
         />
       )}
 
-      {/* ━━ EXIT INTENT / SCROLL RECOVERY BAR (LAYER 3) ━━ */}
+      {/* Exit Intent / Scroll Recovery Bar */}
       {showExitBar && !exitBarDismissed && (
         <aside 
           className="fixed bottom-0 inset-x-0 z-40 bg-[#0e1628]/95 backdrop-blur-md border-t border-blue-500/30 px-6 py-3 shadow-2xl animate-fade-in flex flex-wrap items-center justify-between gap-4"
@@ -286,7 +269,7 @@ export default function App() {
             </div>
             <div>
               <p className="text-xs font-semibold text-white">
-                Before you go — Simulate an unauthorized PLC write attack on the live LabShock plant
+                Simulate an unauthorized PLC write attack on the live plant
               </p>
               <p className="text-[11px] text-slate-400">
                 Observe the tank level physics, valve dynamics, and mathematical digital twin anomaly detection.
@@ -319,7 +302,7 @@ export default function App() {
         </aside>
       )}
 
-      {/* ━━ FOOTER (LAYER 2 SPECIFICATION) ━━ */}
+      {/* Footer */}
       <footer className="border-t border-[#1e2d4a] bg-[#0c1220] py-6 px-6 text-xs text-slate-400">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center md:text-left">
@@ -327,15 +310,16 @@ export default function App() {
               OTSecTwin — Zero-intrusive cyber-physical threat intelligence for water, energy, and mission-critical industrial plants.
             </p>
             <p className="text-[11px] text-slate-500">
-              Engineered by <button onClick={() => setIsDossierOpen(true)} className="text-blue-400 hover:underline">Anish Anandhan</button> • IIT Madras CyStar • Medtronic Global IT • IEEE Publications
+              Operational Technology Asset Intelligence & Anomaly Engine • Passive Modbus Telemetry • NIST SP 800-82r3
             </p>
           </div>
 
           <div className="flex items-center gap-4 text-xs">
             <button onClick={() => setActiveTab("overview")} className="hover:text-white transition">Dashboard</button>
-            <button onClick={() => setActiveTab("simulator")} className="hover:text-white transition">LabShock P&ID</button>
+            <button onClick={() => setActiveTab("simulator")} className="hover:text-white transition">Plant P&ID</button>
             <button onClick={() => setActiveTab("assets")} className="hover:text-white transition">Assets</button>
-            <button onClick={() => setIsDossierOpen(true)} className="hover:text-white transition">Researcher Dossier</button>
+            <button onClick={() => setActiveTab("topology")} className="hover:text-white transition">Topology</button>
+            <button onClick={() => setActiveTab("alerts")} className="hover:text-white transition">Alerts</button>
             <a 
               href="https://github.com/anishanandhan/OTSecTwin" 
               target="_blank" 

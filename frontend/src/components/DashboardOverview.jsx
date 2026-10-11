@@ -41,22 +41,22 @@ export default function DashboardOverview({
       {/* ━━ HERO SECTION (LAYER 2 COPY & LAYER 3 TRUST SIGNALS) ━━ */}
       <section className="enterprise-card p-6 md:p-8 bg-gradient-to-b from-[#101728] to-[#0c121e] border border-blue-500/20 relative overflow-hidden">
         <div className="relative z-10 max-w-4xl space-y-4">
-          {/* Above the Fold Trust Signals (Layer 3) */}
+          {/* Above the Fold Trust Signals */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-500/10 border border-blue-500/30 text-blue-300 font-medium">
-              <Award className="w-3.5 h-3.5 text-blue-400" />
-              <span>IIT Madras CyStar Research</span>
+              <Shield className="w-3.5 h-3.5 text-blue-400" />
+              <span>Passive Deep Packet Inspection</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-medium">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>97.5/100 Benchmark Rating</span>
+              <span>Purdue ISA-95 Demarcation</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-500/10 border border-purple-500/30 text-purple-300 font-medium">
-              <BookOpen className="w-3.5 h-3.5 text-purple-400" />
-              <span>IEEE Published Architecture</span>
+              <Zap className="w-3.5 h-3.5 text-purple-400" />
+              <span>IEC 62443 / NIST SP 800-82r3</span>
             </span>
             <span className="text-[11px] font-mono text-slate-400">
-              Live Baseline • Updated October 2026
+              Live Baseline Active
             </span>
           </div>
 
@@ -70,7 +70,7 @@ export default function DashboardOverview({
             Passively fingerprints Level 0-3 Purdue OT devices, mathematically validates Modbus telemetry, and isolates cyber-physical threats in milliseconds.
           </p>
 
-          {/* CTA Action Buttons (Layer 2 rules: no "Click here", first-person outcome driven) */}
+          {/* CTA Action Buttons */}
           <div className="pt-2 flex flex-wrap items-center gap-3">
             <button
               onClick={() => setActiveTab("simulator")}
@@ -86,14 +86,6 @@ export default function DashboardOverview({
             >
               <Box className="w-4 h-4 text-blue-400" />
               <span>Audit Asset Inventory</span>
-            </button>
-
-            <button
-              onClick={onOpenDossier}
-              className="px-4 py-2 bg-transparent hover:bg-white/5 text-slate-300 border border-white/10 rounded-md text-xs font-semibold flex items-center gap-2 transition"
-            >
-              <FileText className="w-4 h-4 text-emerald-400" />
-              <span>View Research Dossier</span>
             </button>
           </div>
         </div>
@@ -129,11 +121,11 @@ export default function DashboardOverview({
         <div className="enterprise-card p-4 border border-white/10 bg-[#0e1424] space-y-1.5">
           <div className="flex items-center gap-2 text-xs font-semibold text-purple-400">
             <Award className="w-4 h-4" />
-            <span>IIT Madras CyStar Provenance</span>
+            <span>IEC 62443 & NIST SP 800-82r3</span>
           </div>
-          <h4 className="text-xs font-bold text-white">Is this research or production grade?</h4>
+          <h4 className="text-xs font-bold text-white">How does it fit compliance standards?</h4>
           <p className="text-[11px] text-slate-400 leading-normal">
-            Engineered by IIT Madras CyStar cybersecurity researcher, peer-reviewed in IEEE, and fully aligned with NIST SP 800-82r3 and IEC 62443.
+            Maps telemetry directly to Purdue ISA-95 zone boundaries and IEC 62443 security levels, providing continuous audit evidence for critical infrastructure audits.
           </p>
         </div>
       </section>
