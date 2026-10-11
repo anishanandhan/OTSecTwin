@@ -1,7 +1,7 @@
 import React from "react";
 import { Shield, Activity, Network, Box, AlertTriangle, Play, RotateCcw, Cpu, Sparkles, Layers, Sliders } from "lucide-react";
 
-export default function Navbar({ activeTab, setActiveTab, alertCount, onTriggerSim, onInjectAttack, onResetLab, onToggleAiCopilot }) {
+export default function Navbar({ activeTab, setActiveTab, alertCount, onTriggerSim, onInjectAttack, onResetLab, onToggleAiCopilot, onOpenDossier }) {
   const tabs = [
     { id: "overview", label: "Dashboard", icon: Activity },
     { id: "simulator", label: "LabShock Plant P&ID", icon: Sliders },
@@ -98,10 +98,21 @@ export default function Navbar({ activeTab, setActiveTab, alertCount, onTriggerS
             </button>
           </div>
 
+          {/* Researcher Dossier & Credential Trigger */}
+          <button
+            onClick={onOpenDossier}
+            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#101625] hover:bg-[#182033] border border-white/10 text-slate-300 text-xs font-medium transition"
+            title="View Researcher Credentials & Publications"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+            <span>Researcher Dossier</span>
+          </button>
+
           {/* AI Copilot Trigger */}
           <button
             onClick={onToggleAiCopilot}
             className="px-3 py-1.5 bg-[#172138] hover:bg-[#1e2a47] text-white border border-blue-500/30 rounded-md text-xs font-medium flex items-center gap-2 shadow-sm transition group"
+            title="Press / or click to open AI Copilot"
           >
             <Sparkles className="w-3.5 h-3.5 text-blue-400 group-hover:rotate-12 transition-transform" />
             <span>AI Copilot</span>
